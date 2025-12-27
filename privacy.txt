@@ -1,0 +1,21 @@
+PRIVACY POLICY for YouTube Playlist Tools
+Effective Date: December 26, 2025
+
+1. OVERVIEW
+  YouTube Playlist Tools is committed to protecting your privacy. This extension is designed to be a functional tool for managing and sorting YouTube playlists. It does not collect, store, or transmit any user data.
+
+2. DATA COLLECTION AND USAGE
+  This extension does not collect any personal identification information such as names, email addresses, or account credentials. The extension does not track your browsing history or monitor your activity on any websites outside of the specific YouTube playlist URLs required for the toolbar to function. All script logic including sorting, loading videos, and calculating durations based on playback speed occurs entirely within your local browser environment. No data is sent to external servers.
+
+3. THIRD-PARTY DATA DISCLOSURE
+  We do not sell, trade, or otherwise transfer your information to outside parties. Since no data is collected, there is no data to share.
+
+4. PERMISSIONS
+  The activeTab permission is used solely to inject the toolbar onto the YouTube playlist page you are currently viewing. It does not allow the extension to access your data on other sites.
+
+5. COMPLIANCE WITH GOOGLE POLICIES
+  This extension complies with the Google Chrome Web Store User Data Policy, including the Limited Use requirements. We ensure that the extension provides a clear benefit to the user without compromising privacy.
+
+
+6. CONTACT
+  If you have any questions regarding this privacy policy, you may contact the developer through the Chrome Web Store support channel.
