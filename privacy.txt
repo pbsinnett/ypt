@@ -16,6 +16,5 @@ Effective Date: December 26, 2025
 5. COMPLIANCE WITH GOOGLE POLICIES
   This extension complies with the Google Chrome Web Store User Data Policy, including the Limited Use requirements. We ensure that the extension provides a clear benefit to the user without compromising privacy.
 
-
 6. CONTACT
   If you have any questions regarding this privacy policy, you may contact the developer through the Chrome Web Store support channel.
