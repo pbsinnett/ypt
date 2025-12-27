@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Playlist Tools",
+  "version": "1.70",
+  "description": "Sorting, time stats, and load-all tools for YouTube playlists.",
+  "permissions": ["activeTab"],
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["tools.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
