@@ -75,7 +75,6 @@
     }
 
     function getVideoData(vid, index) {
-        // 1. DURATION
         let duration = 0;
         const badge = vid.querySelector('.yt-badge-shape__text') || 
                       vid.querySelector('span#text.ytd-thumbnail-overlay-time-status-renderer') ||
@@ -93,7 +92,6 @@
             }
         }
 
-        // 2. PROGRESS
         let progress = 0;
         const progContainer = vid.querySelector('ytd-thumbnail-overlay-resume-playback-renderer');
         if (progContainer) {
@@ -103,7 +101,6 @@
             }
         }
 
-        // 3. META (Title, ID, Index)
         const titleEl = vid.querySelector('#video-title');
         const title = titleEl ? titleEl.textContent.trim() : "";
         const id = getVideoID(vid);
@@ -114,7 +111,6 @@
             originalIndex = index;
         }
 
-        // 4. CHANNEL NAME (New for v70)
         let channel = "";
         const channelEl = vid.querySelector('.ytd-channel-name') || vid.querySelector('#channel-name');
         if (channelEl) {
@@ -188,7 +184,6 @@
         }, 500); 
     }
 
-
     /* --- UI BUILDER --- */
     function injectToolbar() {
         if (document.getElementById(CONTAINER_ID)) return;
@@ -203,36 +198,61 @@
         
         if (!target) return;
 
-        // Container
+        // Container: Light off-white surface
         const container = createEl('div', {
             display: 'flex', 
             alignItems: 'center', 
-            gap: '10px',
-            margin: '10px 0 10px 0',
-            background: '#1f1f1f',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            border: '1px solid #333',
-            width: 'fit-content',
-            zIndex: '1000'
+            flexWrap: 'wrap',
+            gap: '12px',
+            margin: '0 0 16px 0',
+            background: '#f9f9f9',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: '1px solid #e5e5e5',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            zIndex: '1000',
+            fontFamily: '"Roboto", "Arial", sans-serif'
         });
         container.id = CONTAINER_ID;
 
-        // Load All Button
-        const loadBtn = createEl('button', {
-            background: '#333', color: '#fff', border: '1px solid #555', 
-            borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold'
-        }, 'Load All');
+        // Common Pill Button Style
+        const pillBtnStyle = {
+            background: 'rgba(0, 0, 0, 0.05)',
+            color: '#0f0f0f',
+            border: 'none', 
+            borderRadius: '18px', 
+            padding: '6px 16px', 
+            cursor: 'pointer', 
+            fontSize: '13px', 
+            fontWeight: '500',
+            transition: 'background 0.2s'
+        };
+
+        // Load All Button (Primary Action)
+        const loadBtn = createEl('button', Object.assign({}, pillBtnStyle, {
+            background: '#0f0f0f',
+            color: '#ffffff'
+        }), 'Load All');
         
         loadBtn.onclick = (e) => {
             e.preventDefault();
             loadAllVideos();
         };
 
-        // Sort
-        const sortSelect = createEl('select', { background: '#222', color: '#fff', padding: '4px', border: '1px solid #444', borderRadius: '4px', fontSize: '12px' });
-        
-        // Added 'channel' to options
+        // Common Input/Select Style
+        const inputStyle = {
+            background: '#ffffff',
+            color: '#0f0f0f',
+            padding: '4px 8px',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            fontSize: '13px',
+            outline: 'none'
+        };
+
+        const sortSelect = createEl('select', inputStyle);
         ['index', 'duration', 'title', 'channel', 'progress'].forEach(opt => {
             const o = document.createElement('option');
             o.value = opt;
@@ -240,8 +260,7 @@
             sortSelect.appendChild(o);
         });
 
-        // Direction
-        const dirSelect = createEl('select', { background: '#222', color: '#fff', padding: '4px', border: '1px solid #444', borderRadius: '4px', fontSize: '12px' });
+        const dirSelect = createEl('select', inputStyle);
         [['asc', 'Ascending'], ['desc', 'Descending']].forEach(opt => {
             const o = document.createElement('option');
             o.value = opt[0];
@@ -249,27 +268,31 @@
             dirSelect.appendChild(o);
         });
 
-        // Speed Input
-        const speedInput = createEl('input', { width: '40px', background: '#222', color: '#fff', border: '1px solid #444', textAlign: 'center', padding: '4px', borderRadius: '4px', fontSize: '12px' });
+        const speedInput = createEl('input', Object.assign({}, inputStyle, { width: '45px', textAlign: 'center' }));
         speedInput.type = 'number';
         speedInput.value = state.speed; 
         speedInput.step = '0.1'; 
         speedInput.min = '0.1';  
 
         // Stats Area
-        const statusContainer = createEl('div', { display: 'flex', alignItems: 'center', marginLeft: '10px', fontSize: '12px', color: '#eee' });
+        const statusContainer = createEl('div', { 
+            display: 'flex', 
+            alignItems: 'center', 
+            marginLeft: 'auto', 
+            fontSize: '12px', 
+            color: '#606060', // Corrected to secondary metadata color
+            fontWeight: '400' 
+        });
         statusContainer.id = STATUS_ID;
 
-        // Left Span (Total)
-        const spanTotal = createEl('span', { fontWeight: 'bold' }, 'Loading...');
+        const spanTotal = createEl('span', { fontWeight: '500', color: '#0f0f0f' }, 'Loading...');
         spanTotal.id = SPAN_TOTAL_ID;
         spanTotal.setAttribute('aria-live', 'polite'); 
         spanTotal.setAttribute('aria-atomic', 'true');
 
-        const spanSep = createEl('span', { margin: '0 8px', color: '#888' }, '|');
+        const spanSep = createEl('span', { margin: '0 8px', color: '#e5e5e5' }, '|');
         
-        // Right Span (Progress / Error)
-        const spanProg = createEl('span', { color: '#ccc' }, '');
+        const spanProg = createEl('span', { color: '#606060' }, ''); // Corrected color
         spanProg.id = SPAN_PROG_ID;
         spanProg.setAttribute('aria-live', 'polite'); 
         spanProg.setAttribute('aria-atomic', 'true');
@@ -278,12 +301,12 @@
         statusContainer.appendChild(spanSep);
         statusContainer.appendChild(spanProg);
 
-        // Assemble
+        // Assemble with corrected Label colors (#606060)
         container.appendChild(loadBtn); 
-        container.appendChild(createEl('span', {fontSize: '12px', color: '#aaa', marginLeft: '8px'}, 'Sort: '));
+        container.appendChild(createEl('span', {fontSize: '13px', color: '#606060'}, 'Sort:'));
         container.appendChild(sortSelect);
         container.appendChild(dirSelect);
-        container.appendChild(createEl('span', {fontSize: '12px', color: '#aaa', marginLeft: '5px'}, 'Speed: '));
+        container.appendChild(createEl('span', {fontSize: '13px', color: '#606060'}, 'Speed:'));
         container.appendChild(speedInput);
         container.appendChild(statusContainer);
 
@@ -345,17 +368,15 @@
                 }
             });
 
-            // SCALED MATH
             const remaining = (totalSec - watchedSec) / state.speed;
             const scaledTotal = totalSec / state.speed;
 
-            // OUTPUT
             spanTotal.textContent = `Total: ${validVideos} vids (${formatTime(scaledTotal)} at ${state.speed}x)`;
             
             const pct = ((watchedSec/totalSec)*100).toFixed(0);
             spanProg.textContent = `Progress: ${pct}% (${formatTime(remaining)} left)`;
             
-            spanProg.style.color = (pct === "100") ? '#4caf50' : '#ccc';
+            spanProg.style.color = (pct === "100") ? '#4caf50' : '#606060';
 
         } catch (e) {
             console.error(e);
@@ -375,7 +396,7 @@
                 let vA, vB;
                 if (state.sortType === 'index') { vA = a.data.originalIndex; vB = b.data.originalIndex; }
                 else if (state.sortType === 'title') { vA = a.data.title.toLowerCase(); vB = b.data.title.toLowerCase(); }
-                else if (state.sortType === 'channel') { vA = a.data.channel.toLowerCase(); vB = b.data.channel.toLowerCase(); } // New Sort Type
+                else if (state.sortType === 'channel') { vA = a.data.channel.toLowerCase(); vB = b.data.channel.toLowerCase(); } 
                 else if (state.sortType === 'progress') { vA = a.data.progress; vB = b.data.progress; }
                 else { vA = a.data.duration; vB = b.data.duration; }
 
@@ -391,7 +412,6 @@
 
     /* --- INIT & WATCHER --- */
     setInterval(() => {
-        // 1. Navigation Watcher (Reset on URL Change)
         if (location.href !== lastUrl) {
             lastUrl = location.href;
             state.speed = 1.0; 
@@ -400,7 +420,6 @@
             if (input) input.value = "1.0";
         }
 
-        // 2. Injection & Update
         if (window.location.href.includes('playlist') || window.location.href.includes('list=')) {
             injectToolbar();
             if (!state.isLoading) updateStats(); 
