@@ -3,7 +3,6 @@
   "name": "YouTube Playlist Tools",
   "version": "1.70",
   "description": "Sorting, time stats, and load-all tools for YouTube playlists.",
-  "permissions": ["activeTab"],
   "icons": {
     "16": "images/icon16.png",
     "32": "images/icon32.png",
@@ -25,4 +24,5 @@
       "run_at": "document_idle"
     }
   ]
+
 }
