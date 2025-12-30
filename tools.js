@@ -405,7 +405,12 @@
                 return 0;
             });
 
-            mapped.forEach(item => container.appendChild(item.el));
+            const spinner = container.querySelector('ytd-continuation-item-renderer');
+
+            mapped.forEach(item => {
+                container.insertBefore(item.el, spinner);
+            });
+
             updateStats();
         });
     }
