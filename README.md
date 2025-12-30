@@ -1,5 +1,7 @@
 # YouTube Playlist Tools
 
+[![Available in the Chrome Web Store](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQzWRCzO2/KVp9WvpBCdwbcf6gGaMs.png)](https://chromewebstore.google.com/detail/youtube-playlist-tools/ehkkmfabomefdhfbegkiohmoiolfbjpo)
+
 A powerful, fully accessible browser extension that adds advanced sorting, real-time statistics, and performance tools to YouTube playlists.
 
 ## Key Features
@@ -20,6 +22,12 @@ This project was built specifically to improve the YouTube experience for screen
 * **Stable UI:** Injects a consistent toolbar that doesn't jump around or lose focus.
 * **ARIA Live Regions:** Status updates and error messages are announced immediately to assistive technology.
 * **High Contrast:** Designed with a dark, high-contrast UI for maximum visibility.
+
+## Installation (Chrome Web Store)
+
+1. Click the **Chrome Web Store** badge above.
+2. Click **Add to Chrome**.
+3. Navigate to any YouTube playlist (e.g., your "Watch Later" or a channel's video list) to see the toolbar in action.
 
 ## Installation (Developer Mode)
 
