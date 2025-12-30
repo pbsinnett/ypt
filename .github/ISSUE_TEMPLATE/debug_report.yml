@@ -32,7 +32,7 @@ body:
     attributes:
       label: Relevant URL
       description: Please paste the YouTube playlist URL where this bug happens.
-      placeholder: https://www.youtube.com/playlist?list=...
+      placeholder: "https://www.youtube.com/playlist?list=..."
     validations:
       required: false
   - type: input
@@ -40,7 +40,7 @@ body:
     attributes:
       label: Extension Version
       description: Which version of YouTube Playlist Tools are you using? (e.g., 1.70)
-      placeholder: 1.70
+      placeholder: "1.70"
     validations:
       required: true
   - type: dropdown
