@@ -1,0 +1,65 @@
+name: Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: "When I clicked 'Sort by Duration', the list didn't change..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Relevant URL
+      description: Please paste the YouTube playlist URL where this bug happens.
+      placeholder: https://www.youtube.com/playlist?list=...
+    validations:
+      required: false
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension Version
+      description: Which version of YouTube Playlist Tools are you using? (e.g., 1.70)
+      placeholder: 1.70
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browser are you using?
+      multiple: true
+      options:
+        - Chrome
+        - Edge
+        - Brave
+        - Opera
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: e.g. Windows 11, macOS Sequoia, Linux Ubuntu
+    validations:
+      required: false
