@@ -39,8 +39,8 @@ body:
     id: extension-version
     attributes:
       label: Extension Version
-      description: Which version of YouTube Playlist Tools are you using? (e.g., 1.70)
-      placeholder: "1.70"
+      description: Which version of YouTube Playlist Tools are you using? (e.g., 1.71)
+      placeholder: "1.71"
     validations:
       required: true
   - type: dropdown
@@ -63,3 +63,4 @@ body:
       description: e.g. Windows 11, macOS Sequoia, Linux Ubuntu
     validations:
       required: false
+
