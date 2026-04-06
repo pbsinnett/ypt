@@ -9,25 +9,28 @@ A powerful, fully accessible browser extension that adds advanced sorting, real-
 * **Instant "Load All":** Solves the "infinite scroll" problem by force-loading every video in a playlist into the DOM. This ensures screen readers can navigate the entire list and sorting is 100% accurate.
 * **Smart Time Math:** Automatically calculates the total playlist duration and remaining watch time. 
 * **Dynamic Speed Scaling:** Adjust the "Speed" input (e.g., 1.5x, 2.0x) to see your "Time Remaining" update instantly based on your playback pace.
+* **NEW!** Now speed will adjust based on the speed control in the toolbar. The speed control also stays in sync with video speed if set via another method.
+* **NEW!** One-click buttons to do the most common actions:
+    * **Add to queue:** Queue up a bunch of videos fast!
+    * **Save to Watch Later:** Add videos to your Watch Later without realizing how easy it is, then get frustrated that you now have over 80 hours of videos you won't be able to get through for a long time. Yes, I have a problem.
+    * **Remove from queue/playlist (hide on subscriptions page):** Instantly nuke that video you watched or found boring and uninteresting.
+* **NEW!** For screen readers, puts watched percentages directly in the heading for videos. Now you'll see exactly how much of that long documentary you've watched. We've never had access to this information before!
+* **NEW!** For screen readers, you'll always see the best version of the ARIA label on videos that includes the time. This wasn't being shown in the miniplayer queue.
 * **Advanced Sorting:** Organize your videos by:
     * Channel Name (Group by creator)
     * Duration (Shortest to longest)
     * Title (A-Z)
     * Progress (Watched vs. Unwatched)
-    * Original Index
+    * **NEW!** Date (Get to your newest videos first)
+    * Index (Default)
 
 ## Accessibility First
 
 This project was built specifically to improve the YouTube experience for screen reader users (NVDA, JAWS, VoiceOver).
-* **Stable UI:** Injects a consistent toolbar that doesn't jump around or lose focus.
+
+* **Stable UI:** Injects a consistent toolbar that stays where you're focused, whether it be in a full playlist or the miniplayer queue.
 * **ARIA Live Regions:** Status updates and error messages are announced immediately to assistive technology.
-* **High Contrast:** Designed with a dark, high-contrast UI for maximum visibility.
-
-## Installation (Chrome Web Store)
-
-1. Click the **Chrome Web Store** badge above.
-2. Click **Add to Chrome**.
-3. Navigate to any YouTube playlist (e.g., your "Watch Later" or a channel's video list) to see the toolbar in action.
+* **Theme-Matching:** Seamlessly matches the page's color in light or dark mode.
 
 ## Installation (Developer Mode)
 
