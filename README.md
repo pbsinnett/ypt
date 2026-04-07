@@ -2,7 +2,7 @@
 
 [![Available in the Chrome Web Store](./images/store-badge.png)](https://chromewebstore.google.com/detail/youtube-playlist-tools/ehkkmfabomefdhfbegkiohmoiolfbjpo)
 
-A powerful, fully accessible browser extension that adds advanced sorting, real-time statistics, and performance tools to YouTube playlists.
+A powerful, fully accessible browser extension that adds advanced sorting, real-time statistics, and one-click buttons to YouTube playlists.
 
 ## Key Features
 
@@ -14,15 +14,22 @@ A powerful, fully accessible browser extension that adds advanced sorting, real-
     * **Add to queue:** Queue up a bunch of videos fast!
     * **Save to Watch Later:** Add videos to your Watch Later without realizing how easy it is, then get frustrated that you now have over 80 hours of videos you won't be able to get through for a long time. Yes, I have a problem.
     * **Remove from queue/playlist (hide on subscriptions page):** Instantly nuke that video you watched or found boring and uninteresting.
-* **NEW!** For screen readers, puts watched percentages directly in the heading for videos. Now you'll see exactly how much of that long documentary you've watched. We've never had access to this information before!
-* **NEW!** For screen readers, you'll always see the best version of the ARIA label on videos that includes the time. This wasn't being shown in the miniplayer queue.
+* **NEW!** For screen reader users, puts watched percentages directly in the heading for videos. Now you'll see exactly how much of that long documentary you've watched. We've never had access to this information before!
+* **NEW!** For screen reader users, you'll always see the best version of the ARIA label on videos that includes the time. This wasn't being shown in the miniplayer queue.
+* **NEW!** For screen reader users, the miniplayer queue button is labeled. No guessing what that button is.
 * **Advanced Sorting:** Organize your videos by:
-    * Channel Name (Group by creator)
+    * Index (Default)
+    * Channel (Group by creator)
+    * **NEW!** Date (Get to your newest videos first)
     * Duration (Shortest to longest)
     * Title (A-Z)
-    * Progress (Watched vs. Unwatched)
-    * **NEW!** Date (Get to your newest videos first)
-    * Index (Default)
+    * **NEW!** View count (Watch what everyone else watched first)
+    * Watched Progress (Watched vs. Unwatched)
+
+## Pro Tip: Chained Sorts
+
+Since this extension uses stable sorting algorithms, you can chain sorts together to make secondary and even tertiary orderings! The trick is to apply your sorts in reverse order of importance.
+For example: if you want to group videos by Channel and have each channel's videos ordered by Views, Sort by View Count first, then sort by Channel. To reset everything, just sort by Index again.
 
 ## Accessibility First
 

@@ -8,7 +8,7 @@
     const QUEUE_SPAN_PANEL = 'yt-tools-queue-duration-panel'; 
     const QUEUE_SPAN_MINI = 'yt-tools-queue-duration-mini'; 
     
-    let state = { speed: 1.0, sortType: 'index', sortOrder: 'asc', isLoading: false, isSorting: false, mathSettleTimer: null };
+    let state = { speed: 1.0, sortType: 'index', sortOrder: 'asc', isLoading: false, isSorting: false, mathSettleTimer: null, memoryVault: {} };
     let updateTimer = null;
 
     /* --- INJECT GLOBAL STYLES --- */
@@ -173,7 +173,6 @@
     async function executeHiddenMenuAction(menuBtn, textPriorities, confirmSelector = null, callback = null) {
         document.documentElement.classList.add('yt-tools-hide-popups');
         
-        // SMART PROXY FOCUS LOCK: Silently block YouTube from focusing the 3-dot menu or popup
         const nativeFocus = HTMLElement.prototype.focus;
         HTMLElement.prototype.focus = function() {
             if (this === menuBtn || (this.closest && this.closest('ytd-popup-container'))) return;
@@ -218,25 +217,21 @@
             if (callback) setTimeout(callback, 200);
 
         } catch (err) {
-            console.log("YT-Tools: Menu action failed or timed out.");
             document.body.click(); 
         } finally {
             setTimeout(() => {
                 document.documentElement.classList.remove('yt-tools-hide-popups');
-                HTMLElement.prototype.focus = nativeFocus; // Remove the proxy lock
+                HTMLElement.prototype.focus = nativeFocus;
                 if (typeof startObserver === 'function') startObserver();
             }, 300);
         }
     }
 
-    /* --- PARSING --- */
+    /* --- BULLETPROOF DURATION PARSER --- */
     function parseDurationFromText(text) {
         if (!text) return 0;
         
-        if (text.includes('\u200B')) {
-            text = text.split('\u200B')[1];
-        }
-
+        if (text.includes('\u200B')) text = text.split('\u200B')[1];
         text = text.toLowerCase().trim().replace(/\s+/g, ' ');
 
         const timeMatch = text.match(/(?:^|\b)(\d+:\d{2}(?::\d{2})?)(?:\b|$)/);
@@ -246,31 +241,26 @@
             if (parts.length === 2) return parts[0] * 60 + parts[1];
             return parts[0];
         }
-        
-        let seconds = 0;
-        const h = text.match(/(\d+)\s*(?:hour|hr)/);
-        const m = text.match(/(\d+)\s*(?:minute|min)/);
-        const s = text.match(/(\d+)\s*(?:second|sec)/);
-        if (h) seconds += parseInt(h[1]) * 3600;
-        if (m) seconds += parseInt(m[1]) * 60;
-        if (s) seconds += parseInt(s[1]);
-        return seconds;
-    }
 
-    function parseDateToValue(text) {
-        if (!text) return 0;
-        const str = text.toLowerCase();
-        let val = parseFloat(str) || 0;
-        const match = str.match(/[\d\.]+\s*(min|m|hour|h|day|d|week|w|month|mo|year|y)/);
-        if(!match) return 0;
-        const unit = match[1];
-        if (unit === 'min' || unit === 'm') return val;
-        if (unit === 'hour' || unit === 'h') return val * 60;
-        if (unit === 'day' || unit === 'd') return val * 60 * 24;
-        if (unit === 'week' || unit === 'w') return val * 60 * 24 * 7;
-        if (unit === 'month' || unit === 'mo') return val * 60 * 24 * 30;
-        if (unit === 'year' || unit === 'y') return val * 60 * 24 * 365;
-        return 0; 
+        const blockRegex = /(?:(?:^|\s)(\d+)\s*(?:hours|hour|hr))?[,\s]*(?:(?:^|\s)(\d+)\s*(?:minutes|minute|mins|min))?[,\s]*(?:(?:^|\s)(\d+)\s*(?:seconds|second|secs|sec))?/g;
+        
+        let lastValidSeconds = 0;
+        let match;
+        
+        while ((match = blockRegex.exec(text)) !== null) {
+            if (match.index === blockRegex.lastIndex) blockRegex.lastIndex++;
+            
+            let h = parseInt(match[1]) || 0;
+            let m = parseInt(match[2]) || 0;
+            let s = parseInt(match[3]) || 0;
+            
+            let currentSecs = (h * 3600) + (m * 60) + s;
+            if (currentSecs > 0) {
+                lastValidSeconds = currentSecs; 
+            }
+        }
+
+        return lastValidSeconds;
     }
 
     function formatTime(seconds) {
@@ -288,27 +278,36 @@
         const isMiniExpanded = miniExpandBtn && miniExpandBtn.getAttribute('aria-expanded') === 'true';
         if (isMiniExpanded) {
             const miniPanel = document.querySelector('ytd-miniplayer ytd-playlist-panel-renderer #items.playlist-items');
-            if (isVisible(miniPanel) && miniPanel.children.length > 0) return { type: 'panel', itemsEl: miniPanel, el: miniPanel.closest('ytd-playlist-panel-renderer') };
+            if (isVisible(miniPanel)) return { type: 'panel', itemsEl: miniPanel, el: miniPanel.closest('ytd-playlist-panel-renderer') };
         }
 
         const sidebarPanel = document.querySelector('ytd-watch-flexy #secondary ytd-playlist-panel-renderer#playlist #items.playlist-items');
-        if (isVisible(sidebarPanel) && sidebarPanel.children.length > 0) return { type: 'panel', itemsEl: sidebarPanel, el: sidebarPanel.closest('ytd-playlist-panel-renderer') };
+        if (isVisible(sidebarPanel)) return { type: 'panel', itemsEl: sidebarPanel, el: sidebarPanel.closest('ytd-playlist-panel-renderer') };
 
         const pageList = document.querySelector('ytd-playlist-video-list-renderer #contents');
-        if (isVisible(pageList) && pageList.children.length > 0) return { type: 'page', itemsEl: pageList, el: pageList.closest('ytd-playlist-video-list-renderer') };
+        
+        // THE FIX: YouTube deletes the standard list when empty and renders this message instead.
+        // We find the message, and anchor the toolbar directly to it!
+        const emptyMessage = document.querySelector('ytd-browse[page-subtype="playlist"] ytd-message-renderer, ytd-section-list-renderer[page-subtype="playlist"] ytd-message-renderer');
+        
+        if (isVisible(pageList)) {
+            return { type: 'page', itemsEl: pageList, el: pageList.closest('ytd-playlist-video-list-renderer') };
+        } else if (isVisible(emptyMessage)) {
+            return { type: 'page', itemsEl: emptyMessage, el: emptyMessage.closest('ytd-item-section-renderer') };
+        }
 
         const subGrid = document.querySelector('ytd-browse[page-subtype="subscriptions"] #contents, ytd-browse #contents ytd-rich-grid-renderer #contents');
-        if (isVisible(subGrid) && subGrid.children.length > 0) return { type: 'grid', itemsEl: subGrid, el: subGrid.closest('ytd-rich-grid-renderer') || subGrid };
+        if (isVisible(subGrid)) return { type: 'grid', itemsEl: subGrid, el: subGrid.closest('ytd-rich-grid-renderer') || subGrid };
 
         const allPanels = document.querySelectorAll('ytd-playlist-panel-renderer #items.playlist-items');
         for (let i = 0; i < allPanels.length; i++) {
-            if (isVisible(allPanels[i]) && allPanels[i].children.length > 0) return { type: 'panel', itemsEl: allPanels[i], el: allPanels[i].closest('ytd-playlist-panel-renderer') };
+            if (isVisible(allPanels[i])) return { type: 'panel', itemsEl: allPanels[i], el: allPanels[i].closest('ytd-playlist-panel-renderer') };
         }
         
         return null;
     }
 
-    /* --- DATA EXTRACTOR --- */
+    /* --- CLEAN DATA EXTRACTOR */
     function getVideoID(vid) {
         const links = Array.from(vid.querySelectorAll('a[href*="/watch?"]'));
         for (let link of links) {
@@ -320,6 +319,8 @@
 
     function getVideoData(vid, index) {
         try {
+            const id = getVideoID(vid);
+            
             let duration = 0;
             const badge = vid.querySelector('.yt-badge-shape__text, span#text.ytd-thumbnail-overlay-time-status-renderer, .badge-shape-wiz__text');
             if (badge && badge.textContent && badge.textContent.includes(':')) {
@@ -356,7 +357,7 @@
             }
 
             const titleEl = vid.querySelector('#video-title, .yt-lockup-metadata-view-model__title');
-            const title = titleEl && titleEl.textContent ? titleEl.textContent.trim() : "";
+            let title = titleEl && titleEl.textContent ? titleEl.textContent.trim() : "";
             
             let originalIndex = parseInt(vid.getAttribute('data-original-index'));
             if (isNaN(originalIndex)) {
@@ -369,17 +370,74 @@
             if (channelEl && channelEl.textContent) channel = channelEl.textContent.trim();
 
             let dateVal = 0;
-            const metaLines = Array.from(vid.querySelectorAll('#video-info span, #metadata-line span, .ytContentMetadataViewModelMetadataText, yt-formatted-string'));
-            const dateSpan = metaLines.find(s => s.textContent && s.textContent.toLowerCase().includes('ago'));
-            if (dateSpan) dateVal = parseDateToValue(dateSpan.textContent);
+            let viewsVal = 0;
 
-            return { duration, progress, title, channel, dateVal, originalIndex, element: vid };
+            const metaContainer = vid.querySelector('#metadata, .ytd-video-meta-block, .yt-lockup-metadata-view-model');
+            
+            if (metaContainer) {
+                const fullText = metaContainer.textContent.toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g, ' ');
+
+                const dateMatch = fullText.match(/([\d\.]+)\s*(year|month|week|day|hour|min|sec|mo|y|w|d|h|m|s)[a-z]*\s*ago/);
+                if (dateMatch) {
+                    const v = parseFloat(dateMatch[1]);
+                    const u = dateMatch[2];
+                    if (u.startsWith('y')) dateVal = v * 525600;
+                    else if (u.startsWith('mo')) dateVal = v * 43200;
+                    else if (u.startsWith('w')) dateVal = v * 10080;
+                    else if (u.startsWith('d')) dateVal = v * 1440;
+                    else if (u.startsWith('h')) dateVal = v * 60;
+                    else if (u.startsWith('m')) dateVal = v;
+                    else if (u.startsWith('s')) dateVal = v / 60;
+                }
+
+                const parts = fullText.split(/[•·|]/).map(p => p.trim());
+                for (let p of parts) {
+                    if (p.includes('view') || p.match(/^[\d\.,]+[kmbt]?$/)) {
+                        const cleanP = p.replace(/[\s,]+/g, '');
+                        if (cleanP.includes('no')) {
+                            viewsVal = 0;
+                            break;
+                        }
+                        const vMatch = cleanP.match(/([\d\.]+)([kmbt]?)/);
+                        if (vMatch) {
+                            const val = parseFloat(vMatch[1]);
+                            const mult = vMatch[2];
+                            if (mult === 'k') viewsVal = val * 1000;
+                            else if (mult === 'm') viewsVal = val * 1000000;
+                            else if (mult === 'b') viewsVal = val * 1000000000;
+                            else viewsVal = val;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (id) {
+                if (!state.memoryVault[id]) state.memoryVault[id] = {};
+                
+                if (duration > 0) state.memoryVault[id].duration = duration;
+                if (progress > 0) state.memoryVault[id].progress = progress;
+                if (viewsVal > 0) state.memoryVault[id].views = viewsVal;
+                if (dateVal > 0) state.memoryVault[id].date = dateVal;
+                if (title) state.memoryVault[id].title = title;
+                if (channel) state.memoryVault[id].channel = channel;
+                
+                if (duration === 0) duration = state.memoryVault[id].duration || 0;
+                if (progress === 0) progress = state.memoryVault[id].progress || 0;
+                if (viewsVal === 0) viewsVal = state.memoryVault[id].views || 0;
+                if (dateVal === 0) dateVal = state.memoryVault[id].date || 0;
+                if (!title) title = state.memoryVault[id].title || "";
+                if (!channel) channel = state.memoryVault[id].channel || "";
+            }
+
+            return { duration, progress, title, channel, dateVal, viewsVal, originalIndex, element: vid };
+
         } catch (e) {
-            return { duration: 0, progress: 0, title: "", channel: "", dateVal: 0, originalIndex: index || 0, element: vid };
+            return { duration: 0, progress: 0, title: "", channel: "", dateVal: 0, viewsVal: 0, originalIndex: index || 0, element: vid };
         }
     }
 
-    /* --- CLEANER --- */
+    /* --- NON-DESTRUCTIVE CLEANER --- */
     function cleanAndGetRows() {
         const active = getActiveContainer();
         if (!active || !active.itemsEl) return { container: null, rows: [] };
@@ -391,18 +449,19 @@
         const uniqueRows = [];
 
         rawRows.forEach(row => {
-            if (row.classList.contains('yt-tools-deleted')) {
-                row.remove();
-                return;
-            }
+            if (row.classList.contains('yt-tools-deleted')) return;
 
             const id = getVideoID(row);
-            if (!id) return; 
+            if (!id) {
+                uniqueRows.push(row);
+                return; 
+            }
 
             if (seenIds.has(id)) {
-                row.remove(); 
+                row.style.display = 'none'; 
             } else {
                 seenIds.add(id);
+                row.style.display = ''; 
                 uniqueRows.push(row);
             }
         });
@@ -415,8 +474,9 @@
         if (state.isLoading) return; 
         state.isLoading = true;
 
+        const spanTotal = document.getElementById(SPAN_TOTAL_ID);
+
         try {
-            const spanTotal = document.getElementById(SPAN_TOTAL_ID);
             const active = getActiveContainer();
             if (!active || !active.itemsEl) return;
 
@@ -461,7 +521,10 @@
             console.error("Load failed", e);
         } finally {
             state.isLoading = false;
+            
+            // Just run the update immediately and snap to the top
             updateAll();
+            
             const active = getActiveContainer();
             if (active) {
                 if (active.type === 'panel') active.itemsEl.scrollTop = 0;
@@ -565,12 +628,15 @@
         let container = document.getElementById(CONTAINER_ID);
         
         if (container) {
+            // If the toolbar is already exactly where it belongs, do nothing.
             if (container.nextElementSibling === active.itemsEl) {
                 return; 
             }
             
+            // Teleport the toolbar to the new location
             active.itemsEl.parentNode.insertBefore(container, active.itemsEl);
             
+            // Reset the sorting dropdowns
             state.sortType = 'index';
             state.sortOrder = 'asc';
             const sortSelect = container.querySelector('.yt-tools-sort-select');
@@ -578,10 +644,17 @@
             if (sortSelect) sortSelect.value = 'index';
             if (dirSelect) dirSelect.value = 'asc';
             
+            // THE FIX: Wipe the visible text AND the invisible memory cache!
             const spanTotal = document.getElementById(SPAN_TOTAL_ID);
             const spanProg = document.getElementById(SPAN_PROG_ID);
-            if (spanTotal) spanTotal.textContent = ""; 
-            if (spanProg) spanProg.textContent = "";
+            if (spanTotal) {
+                spanTotal.textContent = ""; 
+                spanTotal.removeAttribute('data-pending-text');
+            }
+            if (spanProg) {
+                spanProg.textContent = "";
+                spanProg.removeAttribute('data-pending-text');
+            }
 
             return; 
         }
@@ -597,11 +670,12 @@
         const sortSelect = createEl('select', 'yt-tools-input yt-tools-sort-select');
         const sortOptions = [
             { value: 'index', label: 'Index (default)' },
+            { value: 'channel', label: 'Channel' },
+            { value: 'date', label: 'Date' },
             { value: 'duration', label: 'Duration' },
             { value: 'title', label: 'Title' },
-            { value: 'channel', label: 'Channel' },
-            { value: 'progress', label: 'Progress' },
-            { value: 'date', label: 'Date Published' }
+            { value: 'views', label: 'View Count' },
+            { value: 'progress', label: 'Watched Progress' }
         ];
         sortOptions.forEach(opt => {
             const o = document.createElement('option');
@@ -691,15 +765,12 @@
 
     /* --- GLOBAL ACCESSIBILITY FIXES --- */
     function fixGlobalAccessibility() {
-        // Target the parent container, NOT the button!
         const infoBar = document.querySelector('ytd-miniplayer-info-bar');
         
-        // If the container exists and we haven't assigned a bodyguard to it yet...
         if (infoBar && !infoBar.dataset.ytToolsGuarded) {
             infoBar.dataset.ytToolsGuarded = 'true';
             const targetLabel = 'Miniplayer queue'; 
             
-            // The enforcement function: Finds whatever button currently exists and fixes it
             const enforceLabel = () => {
                 const btn = infoBar.querySelector('button');
                 if (btn) {
@@ -708,10 +779,9 @@
                         btn.title = targetLabel;
                     }
 
-                    // Check if our invisible span survived. If not, re-inject it into the new button.
                     if (!btn.querySelector('.yt-tools-sr-span')) {
                         const srSpan = document.createElement('span');
-                        srSpan.className = 'yt-tools-sr-span'; // Give it a class so we can find it easily
+                        srSpan.className = 'yt-tools-sr-span'; 
                         srSpan.textContent = targetLabel;
                         srSpan.style.cssText = 'position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;';
                         btn.appendChild(srSpan);
@@ -719,15 +789,13 @@
                 }
             };
 
-            enforceLabel(); // Run immediately for the first button
+            enforceLabel();
 
-            // The Immortal Bodyguard
-            // Because this is attached to the parent container, it survives even if YouTube completely deletes the button!
             const attributeGuard = new MutationObserver(enforceLabel);
             attributeGuard.observe(infoBar, { 
-                childList: true,     // Triggers if YouTube destroys and recreates the button
-                subtree: true,       // Watches deep inside the container
-                attributes: true,    // Triggers if YouTube wipes the aria-label
+                childList: true,     
+                subtree: true,       
+                attributes: true,    
                 attributeFilter: ['aria-label', 'title'] 
             });
         }
@@ -781,7 +849,6 @@
             const isGrid = row.tagName.toLowerCase().includes('grid') || row.tagName.toLowerCase().includes('rich');
             const isPlaying = row.hasAttribute('selected');
 
-            // 1. ACCESSIBLE WATCHED PROGRESS LABELS
             const titleAnchor = row.querySelector('#video-title, .yt-lockup-metadata-view-model__title');
             if (titleAnchor) {
                 const headingParent = titleAnchor.closest('h3, h4');
@@ -815,7 +882,6 @@
                 }
             }
             
-            // 2. ACTION BUTTONS
             const menuRenderer = row.querySelector('ytd-menu-renderer');
             const lockupMenu = row.querySelector('.yt-lockup-metadata-view-model__menu-button');
             const fallbackMenu = row.querySelector('#menu');
@@ -865,7 +931,7 @@
         });
     }
 
-    /* --- MASTER UPDATE CONTROLLER --- */
+    /* --- MASTER UPDATE CONTROLLER (Debounced) --- */
     function updateToolbarStats() {
         const spanTotal = document.getElementById(SPAN_TOTAL_ID);
         const spanProg = document.getElementById(SPAN_PROG_ID);
@@ -882,11 +948,25 @@
             const currentCount = rows.length;
 
             if (currentCount === 0) {
-                clearTimeout(state.mathSettleTimer);
-                if (spanTotal.textContent !== "No videos found.") {
-                    spanTotal.textContent = "No videos found.";
-                    spanProg.textContent = "";
+                const totalText = "No videos found.";
+                const progText = "";
+
+                // 1. Check if we already scheduled this text. If yes, back away slowly.
+                if (spanTotal.getAttribute('data-pending-text') === totalText) {
+                    return; 
                 }
+
+                // 2. Lock in the memory
+                spanTotal.setAttribute('data-pending-text', totalText);
+                spanProg.setAttribute('data-pending-text', progText);
+
+                // 3. Clear any OLD timers and start the fresh 800ms countdown
+                clearTimeout(state.mathSettleTimer);
+                state.mathSettleTimer = setTimeout(() => {
+                    spanTotal.textContent = totalText;
+                    spanProg.textContent = progText;
+                }, 800);
+                
                 injectPlaylistHeaderButtons(0);
                 return;
             }
@@ -895,6 +975,10 @@
 
             rows.forEach((row, i) => {
                 const data = getVideoData(row, i);
+                
+                if (isNaN(data.duration)) data.duration = 0;
+                if (isNaN(data.viewsVal)) data.viewsVal = 0;
+
                 if (data.duration > 0) {
                     totalSec += data.duration;
                     validVideos++;
@@ -945,8 +1029,6 @@
 
     function runSort() {
         state.isSorting = true;
-        const spanTotal = document.getElementById(SPAN_TOTAL_ID);
-        if(spanTotal) spanTotal.textContent = "Sorting...";
 
         requestAnimationFrame(() => {
             try {
@@ -961,7 +1043,8 @@
                     else if (state.sortType === 'title') { vA = a.data.title.toLowerCase(); vB = b.data.title.toLowerCase(); }
                     else if (state.sortType === 'channel') { vA = a.data.channel.toLowerCase(); vB = b.data.channel.toLowerCase(); } 
                     else if (state.sortType === 'progress') { vA = a.data.progress; vB = b.data.progress; }
-                    else if (state.sortType === 'date') { vA = b.data.dateVal; vB = a.data.dateVal; }
+                    else if (state.sortType === 'date') { vA = a.data.dateVal; vB = b.data.dateVal; }
+                    else if (state.sortType === 'views') { vA = a.data.viewsVal; vB = b.data.viewsVal; } 
                     else { vA = a.data.duration; vB = b.data.duration; }
 
                     if (vA < vB) return state.sortOrder === 'asc' ? -1 : 1;
@@ -980,7 +1063,7 @@
         });
     }
 
-    /* --- EVENT-DRIVEN CONTROLLERS (Zero-Polling) --- */
+    /* --- EVENT-DRIVEN CONTROLLERS (Fast Observers) --- */
     document.addEventListener('ratechange', (e) => {
         if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'video') {
             const newSpeed = e.target.playbackRate;
@@ -993,7 +1076,7 @@
                 }
                 
                 const spanTotal = document.getElementById(SPAN_TOTAL_ID);
-                if(spanTotal) spanTotal.removeAttribute('data-last-text');
+                if(spanTotal) spanTotal.removeAttribute('data-pending-text');
 
                 updateAll();
             }
@@ -1001,7 +1084,7 @@
     }, true);
 
     const mainObserver = new MutationObserver((mutations) => {
-        if (state.isSorting) return; 
+        if (state.isSorting || state.isLoading) return; 
 
         let needsUpdate = false;
         let isExpansion = false;
@@ -1039,7 +1122,7 @@
                     
                     if(isExpansion || (mutations[0] && mutations[0].attributeName === 'aria-expanded')) {
                         const spanTotal = document.getElementById(SPAN_TOTAL_ID);
-                        if(spanTotal) spanTotal.removeAttribute('data-last-text');
+                        if(spanTotal) spanTotal.removeAttribute('data-pending-text');
                     }
 
                     updateAll();
