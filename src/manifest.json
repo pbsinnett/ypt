@@ -3,8 +3,15 @@
   "name": "YouTube Playlist Tools",
   "version": "3.18",
   "description": "Sorting, time stats, and one-click buttons for YouTube playlists.",
-  "permissions": ["storage", "tabs"],
-  "background": {"service_worker": "background.js"},
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
@@ -25,8 +32,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "js": ["tools.js"],
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "tools.js"
+      ],
       "run_at": "document_idle"
     }
   ]
