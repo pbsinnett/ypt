@@ -107,6 +107,22 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+        .sticky-footer {
+            position: sticky;
+            bottom: -24px; /* Pulls it flush with the screen bottom */
+            background: var(--surface-color);
+            margin: 32px -24px -24px -24px; /* Expands it to the edges of the card */
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 12px 12px; /* Matches your card's bottom corners */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            z-index: 100;
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.05); /* Adds a subtle shadow above it */
+        }
     </style>
 </head>
 <body>
@@ -120,10 +136,7 @@
 <div id="dragInst" class="sr-only">Press Alt or Option plus the Up or Down arrow keys to reorder focused items.</div>
         
         <div id="zonesContainer"></div>
-
-        <hr>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div class="sticky-footer">
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-reset" id="exportBtn" style="font-size: 13px; padding: 6px 12px;">Export Options</button>
                 <button class="btn btn-reset" id="importBtn" style="font-size: 13px; padding: 6px 12px;">Import Options</button>
