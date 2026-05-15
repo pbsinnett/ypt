@@ -60,7 +60,7 @@ This project was built specifically with  screen reader users (NVDA, JAWS, Voice
 
 ## What's New
 
-### 3.0: What was supposed to be a small update
+### 3.18: What was supposed to be a small update
 * Updated the toolbar to appear almost everywhere. Sort on the subscriptions page, watch later, even a channel's streams and videos.
 * Added one-click buttons in more places. They're also contextually aware depending on the page and type of content. Only the buttons that are in the action menu are available.
 * Renamed sorting methods to be a little more explanatory. For example, Index is now Original Order, Duration is now Length, Views is now Most Popular, etc.
