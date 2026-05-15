@@ -1,6 +1,8 @@
 # YouTube Playlist Tools
 
-![A minimalist logo featuring three dark grey horizontal list bars on the left, with a light blue curved arrow pointing down and to the right toward a stylized orange stopwatch.](./images/icons/logo.svg)
+<div align="center">
+  <img src="./images/icons/logo.svg" width="250" alt="A minimalist logo featuring three dark grey horizontal list bars on the left, with a light blue curved arrow pointing down and to the right toward a stylized orange stopwatch.">
+</div>
 
 [![Available in the Chrome Web Store](./images/store-badge.png)](https://chromewebstore.google.com/detail/youtube-playlist-tools/ehkkmfabomefdhfbegkiohmoiolfbjpo)
 
