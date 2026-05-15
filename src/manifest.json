@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Playlist Tools",
-  "version": "3.18",
+  "version": "3.19",
   "description": "Sorting, time stats, and one-click buttons for YouTube playlists.",
   "permissions": [
     "storage"
