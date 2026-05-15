@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Tools Configuration</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --surface-color: #212121;
+            --text-primary: #f1f1f1;
+            --text-secondary: #aaaaaa;
+            --accent-color: #3ea6ff;
+            --border-color: rgba(255,255,255,0.1);
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-color: #f9f9f9;
+                --surface-color: #ffffff;
+                --text-primary: #0f0f0f;
+                --text-secondary: #606060;
+                --accent-color: #065fd4;
+                --border-color: rgba(0,0,0,0.1);
+            }
+        }
+        body {
+            font-family: "Roboto", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        main {
+            width: 100%;
+            max-width: 800px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        h1 { margin: 0; font-size: 22px; }
+        
+        /* New Section Headings */
+        h2 {
+            margin: 32px 0 16px 0; 
+            font-size: 18px; 
+            font-weight: 500;
+            color: var(--accent-color); 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 8px;
+        }
+        
+        .close-btn {
+            background: transparent; border: none; color: var(--text-secondary);
+            font-size: 24px; cursor: pointer; transition: color 0.2s;
+        }
+        .close-btn:hover { color: var(--text-primary); }
+        .zone-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        h3.zone-title { 
+            font-weight: 500; 
+            margin: 0 0 12px 0; /* Reset default h3 margins */
+            font-size: 15px; 
+            color: var(--text-primary);
+        }
+        .button-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;
+        }
+        .checkbox-wrapper {
+            display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .checkbox-wrapper input[type="checkbox"] {
+            accent-color: var(--accent-color); cursor: pointer; width: 16px; height: 16px;
+        }
+        .checkbox-wrapper:hover { color: var(--text-primary); }
+        .drag-over {
+            border-left: 3px solid var(--accent-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 32px 0 24px 0; }
+        .button-row { display: flex; gap: 1rem; align-items: center; }
+        
+        .btn {
+            padding: 10px 20px; border-radius: 18px; border: none; cursor: pointer;
+            font-size: 14px; font-weight: 500; font-family: inherit;
+        }
+        .btn-reset { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-save { background: var(--text-primary); color: var(--bg-color); }
+        /* Screen Reader Only - Hides element visually but keeps it accessible */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+        }
+        /* Make sure keyboard focus is highly visible! */
+        .checkbox-wrapper:focus-within {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <main id="mainContent">
+    <div id="dragAnnouncer" class="sr-only" aria-live="assertive"></div>
+        <div class="header-top">
+            <h1 data-i18n="optionsTitle">Row Button Configuration</h1>
+            <button class="close-btn" id="closeBtn" aria-label="Close">&times;</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Select up to 3 buttons per zone to prevent layout overlap.</p>
+<div id="dragInst" class="sr-only">Press Alt or Option plus the Up or Down arrow keys to reorder focused items.</div>
+        
+        <div id="zonesContainer"></div>
+
+        <hr>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-reset" id="exportBtn" style="font-size: 13px; padding: 6px 12px;">Export Options</button>
+                <button class="btn btn-reset" id="importBtn" style="font-size: 13px; padding: 6px 12px;">Import Options</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+
+            <div class="button-row">
+                <div id="statusMessage" role="alert" aria-live="assertive" style="color: #4caf50; font-weight: bold; font-size: 14px; margin-right: 8px;"></div>
+                <button class="btn btn-reset" id="resetButton" data-i18n="resetButton">Restore Defaults</button>
+                <button class="btn btn-save" id="saveButton" data-i18n="saveButton">Save Preferences</button>
+            </div>
+        </div>
+    </main>
+    <script src="options.js"></script>
+</body>
+</html>
