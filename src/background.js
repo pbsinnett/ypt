@@ -11,14 +11,12 @@ chrome.runtime.onInstalled.addListener((details) => {
         const anchorLink = currentVersion.replace(/\./g, '');
         
         // Replace this URL with your actual GitHub repository URL
-        const changelogUrl = `https://github.com/pbsinnett/ypt#whats-new`;
+        const changelogUrl = `https://pbsinnett.github.io/ypt/#whats-new`;
 
         // Open the changelog in a new tab
         chrome.tabs.create({ url: changelogUrl });
     } 
-    
-    // Optional: You can also catch brand new installs here!
     else if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
-        // chrome.tabs.create({ url: changelogUrl });
+        chrome.tabs.create({ url: changelogUrl });
     }
 });
