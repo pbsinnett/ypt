@@ -12,7 +12,7 @@ body:
     attributes:
       label: What happened?
       description: Also tell us, what did you expect to happen?
-      placeholder: "When I clicked 'Sort by Duration', the list didn't change..."
+      placeholder: "When I clicked Load All, nothing happened..."
     validations:
       required: true
   - type: textarea
@@ -31,16 +31,16 @@ body:
     id: url
     attributes:
       label: Relevant URL
-      description: Please paste the YouTube playlist URL where this bug happens.
-      placeholder: "https://www.youtube.com/playlist?list=..."
+      description: Please paste the YouTube URL where this bug happens.
+      placeholder: "https://www.youtube.com/..."
     validations:
       required: false
   - type: input
     id: extension-version
     attributes:
       label: Extension Version
-      description: Which version of YouTube Playlist Tools are you using? (e.g., 1.71)
-      placeholder: "1.71"
+      description: Which version of YouTube Playlist Tools are you using? (e.g., 3.19)
+      placeholder: "3.19"
     validations:
       required: true
   - type: dropdown
@@ -50,6 +50,7 @@ body:
       multiple: true
       options:
         - Chrome
+        - Firefox
         - Edge
         - Brave
         - Opera

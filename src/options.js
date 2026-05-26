@@ -87,7 +87,11 @@ function announceMove(itemLabel) {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Fetch Storage FIRST
     chrome.storage.sync.get({ ytBtnConfig: {} }, (data) => {
-        const savedConfig = data.ytBtnConfig || {};
+    // Firefox safety net: silently catch errors and handle undefined data
+    if (chrome.runtime.lastError) {
+        console.warn("Storage check:", chrome.runtime.lastError.message);
+    }
+    const savedConfig = (data && data.ytBtnConfig) ? data.ytBtnConfig : {};
         const container = document.getElementById('zonesContainer');
         
         // 2. Build DOM using saved order

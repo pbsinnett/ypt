@@ -1,11 +1,17 @@
 chrome.runtime.onInstalled.addListener((details) => {
-    // 1. Define the URL at the top so the whole listener can see it
-    const changelogUrl = "https://pbsinnett.github.io/ypt/#whats-new";
+  const installUrl = "https://pbsinnett.github.io/ypt#youtube-playlist-tools";
+  const changelogUrl = "https://pbsinnett.github.io/ypt#whats-new";
+  let targetUrl = "";
 
-    // 2. Combine the checks! If it's an install OR an update, open the tab.
-    if (details.reason === chrome.runtime.OnInstalledReason.INSTALL || 
-        details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
-        
-        chrome.tabs.create({ url: changelogUrl });
-    }
+  if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    targetUrl = installUrl;
+  } else if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+    targetUrl = changelogUrl;
+  }
+
+  if (targetUrl) {
+    setTimeout(() => {
+      chrome.tabs.create({ url: targetUrl });
+    }, 150);
+  }
 });
